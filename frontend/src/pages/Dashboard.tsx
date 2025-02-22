@@ -12,13 +12,16 @@ interface Product {
 
 const Dashboard: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
-    const [error, setError] = useState<string | null>(null);
+    const [error] = useState<string | null>(null);
 
     useEffect(() => {
-        axios.get("http://localhost:8000/api/products")
+        axios.get("http://localhost:8000/api/products", {
+            withCredentials: true
+        })
         .then(response => setProducts(response.data))
         .catch(error => console.error('Error fetching data: ', error));
-        setError('Error fetching data');},[]);
+    }, []);
+
     return (
         <div>
             <h1>Dashboard</h1>

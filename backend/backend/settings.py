@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-4q&2d+)9lb_0$feb90)1#4%v69f@)a=r(-+*o$=d2l^%kui&0z'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -42,6 +42,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Third-party apps
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.github',  # GitHub OAuth
+
     'rest_framework',
     'corsheaders',  # for corsheader
     'backend.db',
@@ -56,7 +63,16 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',  # Allow social auth
+)
+AUTH_USER_MODEL = 'db.CustomUser'  # Reference the model correctly
+SOCIALACCOUNT_ADAPTER = 'backend.db.pipeline.GitHubAdapter'
+
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -86,6 +102,17 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+SITE_ID = 1
+
+SOCIALACCOUNT_PROVIDERS = {
+    'github': {
+        'APP': {
+            'client_id': env('GITHUB_CLIENT_ID'),
+            'secret': env('GITHUB_CLIENT_SECRET'),
+        }
     }
 }
 
@@ -137,6 +164,15 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:5173',  # To be able to access backend from local development
+# ]
+
+# Add these CORS settings
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',  # To be able to access backend from local development
+    'http://localhost:5173',
+]
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5173',
 ]
