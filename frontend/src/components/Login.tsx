@@ -9,7 +9,7 @@ const Login: React.FC = () => {
         <div className="flex flex-col items-center justify-center h-screen">
             <h1 className="text-2xl mb-4">Login to Continue</h1>
             <button 
-                className="px-4 py-2 bg-black text-white rounded" 
+                className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800" 
                 onClick={handleGithubLogin}
             >
                 Login with GitHub

@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Login from './components/Login';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import Products from './pages/Products';
 
 function App() {
   return (
@@ -12,6 +13,9 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Login />} />
+          <Route path="/products" element={<ProtectedRoute>
+                <Products />
+              </ProtectedRoute>} />
           <Route
             path="/home"
             element={
