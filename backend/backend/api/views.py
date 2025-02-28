@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view
 from backend.db.models import Sneaker
 from django.utils.timezone import now
 from .serializers import SneakerSerializer
+from django.core.paginator import Paginator
 from .services.stockx_service import get_stockx_products
 
 @api_view(["GET"])
@@ -46,7 +47,18 @@ def fetch_products(request):
 
 @api_view(["GET"])
 def get_sneakers(request):
+
+    page = request.GET.get("page", 1)
+    per_page = request.GET.get("per_page", 10)
+
     """Get all sneakers from the database"""
     sneakers = Sneaker.objects.all()
-    serializer = SneakerSerializer(sneakers, many=True)
-    return Response(serializer.data)
+    paginator = Paginator(sneakers, per_page)
+    paginated_sneakers = paginator.get_page(page)
+
+    serializer = SneakerSerializer(paginated_sneakers, many=True)
+    return Response({
+        "products": serializer.data,
+        "total_pages": paginator.num_pages,
+        "current_page": paginated_sneakers.number
+    })

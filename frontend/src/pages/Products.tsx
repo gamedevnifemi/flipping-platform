@@ -17,21 +17,30 @@ interface Sneaker {
     last_updated: string;
 }
 
+interface SneakersResponse {
+    products: Sneaker[];
+    total_pages: number;
+    current_page: number;
+}
+
 const Products = () => {
     const [sneakers, setSneakers] = useState<Sneaker[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [platform, setPlatform] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(2);
 
     useEffect(() => {
         const fetchSneakers = async () => {
             try {
                 const apiUrl = import.meta.env.VITE_PRODUCT_API_URL;
-                const response = await axios.get<Sneaker[]>(
-                    apiUrl,
+                const response = await axios.get<SneakersResponse>(
+                    `${apiUrl}?page=${currentPage}&per_page=6`,
                     { withCredentials: true }
                 );
-                setSneakers(response.data);
+                setSneakers(response.data.products);
+                setTotalPages(response.data.total_pages);
             } catch (error) {
                 console.error("Error fetching sneakers", error);
             } finally {
@@ -40,7 +49,20 @@ const Products = () => {
         };
 
         fetchSneakers();
-    }, []);
+    }, [currentPage]); // Fetch new data when page changes
+
+    const nextPage = () => {
+        if (currentPage < totalPages){
+            setCurrentPage(currentPage + 1);
+        }
+    }
+
+    const prevPage = () => {
+        if (currentPage > 1){
+            setCurrentPage(currentPage - 1);
+        }
+    }
+
 
     return (
         <DashboardLayout>
@@ -105,6 +127,27 @@ const Products = () => {
                             ))}
                         </div>
                     )}
+
+                    {/* Pagination */}
+                    <div className="flex justify-center mt-8">
+                        <button
+                            onClick={prevPage}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 border border-gray-300 rounded-lg mr-2 disabled:opacity-50"
+                        >
+                            Previous
+                        </button>
+                        <span className="text-gray-600 px-4 py-2 border border-gray-300 rounded-lg mr-2">
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                            onClick={nextPage}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
+                        >
+                            Next
+                        </button>
+                    </div>
                 </div>
             </div>
         </DashboardLayout>
