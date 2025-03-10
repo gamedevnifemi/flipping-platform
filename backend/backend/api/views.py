@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from backend.db.models import Sneaker
+from backend.db.models import Sneaker, SneakerPriceHistory
 from django.utils.timezone import now
 from .serializers import SneakerSerializer
 from django.core.paginator import Paginator
@@ -62,3 +62,24 @@ def get_sneakers(request):
         "total_pages": paginator.num_pages,
         "current_page": paginated_sneakers.number
     })
+
+@api_view(["GET"])
+def get_price_history(request, sneaker_id):
+    """Retrieve price history for a sneaker"""
+    try:
+        sneaker = Sneaker.objects.get(id=sneaker_id)
+        price_history = SneakerPriceHistory.objects.filter(sneaker=sneaker).order_by("recorded_at")
+
+        data = [
+            {
+                "date": entry.recorded_at.strftime("%Y-%m-%d"),
+                "stockX_price": entry.stockx_price,
+                "goat_price": entry.goat_price
+            }
+            for entry in price_history
+        ]
+
+        return Response({"sneaker": sneaker.shoe_name, "price_history": data})
+
+    except Sneaker.DoesNotExist:
+        return Response({"error": "Sneaker not found."}, status=404)

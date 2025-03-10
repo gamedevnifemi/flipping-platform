@@ -36,7 +36,7 @@ const Products = () => {
             try {
                 const apiUrl = import.meta.env.VITE_PRODUCT_API_URL;
                 const response = await axios.get<SneakersResponse>(
-                    `${apiUrl}?page=${currentPage}&per_page=6`,
+                    `${apiUrl}products/?page=${currentPage}&per_page=6`,
                     { withCredentials: true }
                 );
                 setSneakers(response.data.products);

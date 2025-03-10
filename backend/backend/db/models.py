@@ -52,3 +52,13 @@ class Sneaker(models.Model):
 
     def __str__(self):
         return f"{self.shoe_name} - {self.style_id}"
+
+class SneakerPriceHistory(models.Model):
+    sneaker = models.ForeignKey(Sneaker, on_delete=models.CASCADE, related_name="price_history")
+    recorded_at = models.DateTimeField(auto_now_add=True)
+    stockx_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    goat_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.sneaker.shoe_name} - {self.recorded_at.strftime('%Y-%m-%d')}"
+

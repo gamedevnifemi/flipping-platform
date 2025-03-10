@@ -1,54 +1,46 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
 import DashboardLayout from "../layouts/Dashboard";
+import usePriceHistory from "../hooks/usePriceHistory";
+import PriceChart from "../components/PriceChart";
 
-interface Product {
-    id: number;
-    title: string;
-    marketplace: string;
-    price: number;
-    last_updated: string;
-}
-
-const Dashboard: React.FC = () => {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
-    const apiUrl = import.meta.env.VITE_PRODUCT_API_URL;
-
-    useEffect(() => {
-        axios.get(apiUrl, {
-            withCredentials: true
-        })
-        .then(response => {
-            setProducts(response.data);
-            setLoading(false);
-        })
-        .catch(error => {
-            console.error('Error fetching data: ', error);
-            setLoading(false);
-        });
-    }, []);
+const Dashboard = () => {
+    // Default to showing the first sneaker or allow user to select one
+    const [selectedSneakerId, setSelectedSneakerId] = useState<number>(1);
+    const { priceHistory, loading } = usePriceHistory(selectedSneakerId);
 
     return (
         <DashboardLayout>
             <div className="p-6">
                 <h1 className="text-3xl font-bold text-gray-800 mb-8">Dashboard</h1>
-                {loading ? (
-                    <div className="flex justify-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {products.map((product) => (
-                            <div key={product.id} className="bg-white rounded-lg shadow p-6">
-                                <h3 className="text-lg font-semibold mb-2">{product.title}</h3>
-                                <p className="text-gray-600">{product.marketplace}</p>
-                                <p className="text-2xl font-bold text-blue-600 mt-2">£{product.price}</p>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                
+                {/* Add selector for different sneakers */}
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Select Sneaker:
+                    </label>
+                    <select
+                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                        value={selectedSneakerId}
+                        onChange={(e) => setSelectedSneakerId(Number(e.target.value))}
+                    >
+                        <option value={1}>Jordan 1 Retro</option>
+                        <option value={2}>Yeezy 350</option>
+                        <option value={3}>Nike Dunk Low</option>
+                    </select>
+                </div>
+                
+                <div className="p-6 bg-white rounded-lg shadow-md">
+                    <h2 className="text-xl font-bold mb-4">Sneaker Market Trends</h2>
+                    
+                    {loading ? (
+                        <div className="flex justify-center py-10">
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                        </div>
+                    ) : (
+                        <PriceChart priceHistory={priceHistory} />
+                    )}
+                </div>
             </div>
         </DashboardLayout>
     );
